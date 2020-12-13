@@ -30,9 +30,9 @@ impl Triangle {
         [[c_x[0], c_y[0], c_z[0]], [c_x[2], c_y[2], c_z[2]]]
     }
     fn cartesian_to_barycentric(&self, pt: Point) -> Point {
-        let v0 = self.b - self.a;
-        let v1 = self.c - self.a;
-        let v2 = pt - self.a;
+        let v0 = Point{x = self.b.x - self.a.x, y = self.b.y - self.a.y, z = self.b.z - self.a.z};
+        let v1 = Point{x = self.c.x - self.a.x, y = self.c.y - self.a.y, z = self.c.z - self.a.z;
+        let v2 = Point{x = pt.x - self.a.x, y = pt.y - self.a.y, z = pt.z - self.a.z};
         let den = 1.0 / (v0.x * v1.y - v1.x * v0.y);
         let v = (v2.x * v1.y - v1.x * v2.y) * den;
         let w = (v0.x * v2.y - v2.x * v0.y) * den;

@@ -24,10 +24,10 @@ impl Triangle {
         let mut c_x = [self.a.x, self.b.x, self.c.x];
         let mut c_y = [self.a.y, self.b.y, self.c.y];
         let mut c_z = [self.a.z, self.b.z, self.c.z];
-        coords_x.sort_by(|i, j| i.partial_cmp(j).unwrap());
-        coords_y.sort_by(|i, j| i.partial_cmp(j).unwrap());
-        coords_z.sort_by(|i, j| i.partial_cmp(j).unwrap());
-        [[c_x[0], c_y[0], c_z[0]], [c_x[2], c_y[2], c_z[2]]]
+        c_x.sort_by(|i, j| i.partial_cmp(j).unwrap());
+        c_y.sort_by(|i, j| i.partial_cmp(j).unwrap());
+        c_z.sort_by(|i, j| i.partial_cmp(j).unwrap());
+        [Point{c_x[0], c_y[0], c_z[0]}, Point{c_x[2], c_y[2], c_z[2]}]
     }
     fn cartesian_to_barycentric(&self, pt: Point) -> Point {
         let v0 = Point{x = self.b.x - self.a.x, y = self.b.y - self.a.y, z = self.b.z - self.a.z};

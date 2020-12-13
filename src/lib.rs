@@ -27,22 +27,45 @@ impl Triangle {
         c_x.sort_by(|i, j| i.partial_cmp(j).unwrap());
         c_y.sort_by(|i, j| i.partial_cmp(j).unwrap());
         c_z.sort_by(|i, j| i.partial_cmp(j).unwrap());
-        [Point{x = c_x[0], y = c_y[0], z = c_z[0]}, Point{x = c_x[2], y = c_y[2], z = c_z[2]}]
+        [
+            Point {
+                x: c_x[0],
+                y: c_y[0],
+                z: c_z[0],
+            },
+            Point {
+                x: c_x[2],
+                y: c_y[2],
+                z: c_z[2],
+            },
+        ]
     }
     fn cartesian_to_barycentric(&self, pt: Point) -> Point {
-        let v0 = Point{x = self.b.x - self.a.x, y = self.b.y - self.a.y, z = self.b.z - self.a.z};
-        let v1 = Point{x = self.c.x - self.a.x, y = self.c.y - self.a.y, z = self.c.z - self.a.z};
-        let v2 = Point{x = pt.x - self.a.x, y = pt.y - self.a.y, z = pt.z - self.a.z};
+        let v0 = Point {
+            x: self.b.x - self.a.x,
+            y: self.b.y - self.a.y,
+            z: self.b.z - self.a.z,
+        };
+        let v1 = Point {
+            x: self.c.x - self.a.x,
+            y: self.c.y - self.a.y,
+            z: self.c.z - self.a.z,
+        };
+        let v2 = Point {
+            x: pt.x - self.a.x,
+            y: pt.y - self.a.y,
+            z: pt.z - self.a.z,
+        };
         let den = 1.0 / (v0.x * v1.y - v1.x * v0.y);
         let v = (v2.x * v1.y - v1.x * v2.y) * den;
         let w = (v0.x * v2.y - v2.x * v0.y) * den;
         let u = 1.0 - v - w;
-        Point{x = u, y = v, z = w}
+        Point { x: u, y: v, z: w }
     }
     fn barycentric_to_cartesian(&self, pt: Point) -> Point {
         let x = pt.x * self.a.x + pt.y * self.b.x + pt.z * self.c.x;
         let y = pt.x * self.a.y + pt.y * self.b.y + pt.z * self.c.y;
         let z = pt.x * self.a.z + pt.y * self.b.z + pt.z * self.c.z;
-        Point{x = x, y = y, z = z}
+        Point { x: x, y: y, z: z }
     }
 }

@@ -10,7 +10,7 @@ pub struct Triangle {
     c: Point,
 }
 impl Triangle {
-    fn has_point(&self, pt: Point) -> bool {
+    pub fn has_point(&self, pt: Point) -> bool {
         ///Checks whether a given point lies inside the triangle.
         fn sign(a: &Point, b: &Point, c: &Point) -> f32 {
             (a.x - c.x) * (b.y - c.y) - (b.x - c.x) * (a.y - c.y)
@@ -22,7 +22,7 @@ impl Triangle {
         let has_pos = (d1 > 0.0) || (d2 > 0.0) || (d3 > 0.0);
         !(has_neg && has_pos)
     }
-    fn aabb(&self) -> [Point; 2] {
+    pub fn aabb(&self) -> [Point; 2] {
         ///Returns two opposite points of axis-aligned bounding box.
         let mut c_x = [self.a.x, self.b.x, self.c.x];
         let mut c_y = [self.a.y, self.b.y, self.c.y];
@@ -43,7 +43,7 @@ impl Triangle {
             },
         ]
     }
-    fn cartesian_to_barycentric(&self, pt: &Point) -> Point {
+    pub fn cartesian_to_barycentric(&self, pt: &Point) -> Point {
         ///Convert cartesian coordinates of given point to barycentric coordinate system of the
         ///Triangle.
         let v0 = Point {
@@ -67,7 +67,7 @@ impl Triangle {
         let u = 1.0 - v - w;
         Point { x: u, y: v, z: w }
     }
-    fn barycentric_to_cartesian(&self, pt: &Point) -> Point {
+    pub fn barycentric_to_cartesian(&self, pt: &Point) -> Point {
         ///Converts barycentric coordinates of given point to cartesian coordinate system.
         let x = pt.x * self.a.x + pt.y * self.b.x + pt.z * self.c.x;
         let y = pt.x * self.a.y + pt.y * self.b.y + pt.z * self.c.y;

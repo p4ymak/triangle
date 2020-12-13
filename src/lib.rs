@@ -1,7 +1,7 @@
 pub struct Point {
-    pub x: <T: Into<f64> + Copy>,
-    pub y: <T: Into<f64> + Copy>,
-    pub z: <T: Into<f64> + Copy>,
+    pub x: f64,
+    pub y: f64,
+    pub z: f64,
 }
 
 pub struct Triangle {

@@ -10,12 +10,12 @@ struct Triangle {
 }
 impl Triangle {
     fn has_point(&self, pt: Point) -> bool {
-        fn sign(a: Point, b: Point, c: Point) -> f32 {
-            (a.x - c.x) * (b.y - c.y) - (b.x - c.x) * (a.y - c.y)
+        fn sign(a: &Point, b: &Point, c: &Point) -> f32 {
+            (*a.x - *c.x) * (*b.y - *c.y) - (*b.x - *c.x) * (*a.y - *c.y)
         }
-        let d1 = sign(pt, self.a, self.b);
-        let d2 = sign(pt, self.b, self.c);
-        let d3 = sign(pt, self.c, self.a);
+        let d1 = sign(&pt, &self.a, &self.b);
+        let d2 = sign(&pt, &self.b, &self.c);
+        let d3 = sign(&pt, &self.c, &self.a);
         let has_neg = (d1 < 0.0) || (d2 < 0.0) || (d3 < 0.0);
         let has_pos = (d1 > 0.0) || (d2 > 0.0) || (d3 > 0.0);
         !(has_neg && has_pos)
@@ -40,7 +40,7 @@ impl Triangle {
             },
         ]
     }
-    fn cartesian_to_barycentric(&self, pt: Point) -> Point {
+    fn cartesian_to_barycentric(&self, pt: &Point) -> Point {
         let v0 = Point {
             x: self.b.x - self.a.x,
             y: self.b.y - self.a.y,
@@ -52,9 +52,9 @@ impl Triangle {
             z: self.c.z - self.a.z,
         };
         let v2 = Point {
-            x: pt.x - self.a.x,
-            y: pt.y - self.a.y,
-            z: pt.z - self.a.z,
+            x: *pt.x - self.a.x,
+            y: *pt.y - self.a.y,
+            z: *pt.z - self.a.z,
         };
         let den = 1.0 / (v0.x * v1.y - v1.x * v0.y);
         let v = (v2.x * v1.y - v1.x * v2.y) * den;
@@ -62,10 +62,10 @@ impl Triangle {
         let u = 1.0 - v - w;
         Point { x: u, y: v, z: w }
     }
-    fn barycentric_to_cartesian(&self, pt: Point) -> Point {
-        let x = pt.x * self.a.x + pt.y * self.b.x + pt.z * self.c.x;
-        let y = pt.x * self.a.y + pt.y * self.b.y + pt.z * self.c.y;
-        let z = pt.x * self.a.z + pt.y * self.b.z + pt.z * self.c.z;
+    fn barycentric_to_cartesian(&self, pt: &Point) -> Point {
+        let x = *pt.x * self.a.x + *pt.y * self.b.x + *pt.z * self.c.x;
+        let y = *pt.x * self.a.y + *pt.y * self.b.y + *pt.z * self.c.y;
+        let z = *pt.x * self.a.z + *pt.y * self.b.z + *pt.z * self.c.z;
         Point { x: x, y: y, z: z }
     }
 }

@@ -1,7 +1,7 @@
 pub struct Point {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
+    pub x: <T: Into<f64> + Copy>,
+    pub y: <T: Into<f64> + Copy>,
+    pub z: <T: Into<f64> + Copy>,
 }
 
 pub struct Triangle {
@@ -13,7 +13,7 @@ impl Triangle {
     ///Checks whether a given point lies inside the triangle.
     pub fn has_point(&self, pt: Point) -> bool {
         fn sign(a: &Point, b: &Point, c: &Point) -> f32 {
-            (a.x - c.x) * (b.y - c.y) - (b.x - c.x) * (a.y - c.y)
+            ((a.x - c.x) * (b.y - c.y) - (b.x - c.x) * (a.y - c.y)) as f32
         }
         let d1 = sign(&pt, &self.a, &self.b);
         let d2 = sign(&pt, &self.b, &self.c);

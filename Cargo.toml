@@ -6,6 +6,5 @@ edition = "2018"
 license = "MIT"
 repository = "https://github.com/p4ymak/traingle"
 description = "Struct for geometric triangles. Includes Barycentric-Cartesian transforms and stuff.."
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]

@@ -1,6 +1,6 @@
 [package]
 name = "triangle"
-version = "0.1.340"
+version = "0.1.341"
 authors = ["Roman Chumak <p4ymak@gmail.com>"]
 edition = "2018"
 license = "MIT"

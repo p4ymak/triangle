@@ -27,7 +27,7 @@ impl Triangle {
         c_x.sort_by(|i, j| i.partial_cmp(j).unwrap());
         c_y.sort_by(|i, j| i.partial_cmp(j).unwrap());
         c_z.sort_by(|i, j| i.partial_cmp(j).unwrap());
-        [Point{c_x[0], c_y[0], c_z[0]}, Point{c_x[2], c_y[2], c_z[2]}]
+        [Point{x = c_x[0], y = c_y[0], z = c_z[0]}, Point{x = c_x[2], y = c_y[2], z = c_z[2]}]
     }
     fn cartesian_to_barycentric(&self, pt: Point) -> Point {
         let v0 = Point{x = self.b.x - self.a.x, y = self.b.y - self.a.y, z = self.b.z - self.a.z};

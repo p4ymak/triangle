@@ -22,7 +22,7 @@ impl Triangle {
         let has_pos = (d1 > 0.0) || (d2 > 0.0) || (d3 > 0.0);
         !(has_neg && has_pos)
     }
-    fn AABB(&self) -> [Point; 2] {
+    fn aabb(&self) -> [Point; 2] {
         ///Returns two opposite points of axis-aligned bounding box.
         let mut c_x = [self.a.x, self.b.x, self.c.x];
         let mut c_y = [self.a.y, self.b.y, self.c.y];

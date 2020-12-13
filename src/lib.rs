@@ -1,10 +1,10 @@
-struct Point {
+pub struct Point {
     x: f32,
     y: f32,
     z: f32,
 }
 
-struct Triangle {
+pub struct Triangle {
     a: Point,
     b: Point,
     c: Point,

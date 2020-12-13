@@ -23,7 +23,7 @@ impl Triangle {
     fn bounds(&self) -> [Point; 2] {
         let mut c_x = [self.a.x, self.b.x, self.c.x];
         let mut c_y = [self.a.y, self.b.y, self.c.y];
-        let mut c_z = self.a.z, self.b.z, self.c.z]
+        let mut c_z = [self.a.z, self.b.z, self.c.z];
         coords_x.sort_by(|i, j| i.partial_cmp(j).unwrap());
         coords_y.sort_by(|i, j| i.partial_cmp(j).unwrap());
         coords_z.sort_by(|i, j| i.partial_cmp(j).unwrap());

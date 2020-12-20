@@ -1,9 +1,108 @@
-#[derive(Debug)]
+pub trait Point3: Sized + Copy{
+    fn from_tuple(tup: (f64, f64, f64)) -> Self;
+    fn from_array(arr: [f64;3]) -> Self{
+        Self::from_tuple((arr[0] , arr[1] , arr[2]))
+    }
+    fn from_other<P: Point3>(other: P) -> Self{
+        let (x , y , z)  = other.into_tuple();
+        Self::from_tuple((x , y ,z))
+    }
+    fn x(&self) -> f64;
+    fn y(&self) -> f64;
+    fn z(&self) -> f64;
+    fn square_elements(&self) -> Self{
+        let (x , y , z) = self.into_tuple();
+        Self::from_tuple((x * x , y * y , z * z))
+    }
+    fn sub_elements(&self , rhs: &Self) -> Self{
+        let t1 = self.into_tuple();
+        let t2 = rhs.into_tuple();
+        Self::from_tuple((
+            t1.0 - t2.0,
+            t1.1 - t2.1,
+            t1.2 - t2.2,
+        ))
+    }
+    fn sum_elements(&self) -> f64{
+        self.x() + self.y() + self.z()
+    }
+    fn distance(&self , rhs: &Self) -> f64{
+        self.sub_elements(rhs).square_elements().sum_elements().sqrt()
+    }
+    fn into_tuple(&self) -> (f64, f64, f64) {
+        (self.x(), self.y(), self.z())
+    }
+    fn into_array(&self) -> [f64; 3] {
+        let (x, y, z) = self.into_tuple();
+        [x, y, z]
+    }
+}
+pub trait Trig<P: Point3> : Sized + Copy {
+    fn from_tuple(tup: (P, P, P)) -> Self;
+    fn a(&self) -> P;
+    fn b(&self) -> P;
+    fn c(&self) -> P;
+    fn into_tuple(&self) -> (P, P, P) {
+        (self.a(), self.b(), self.c())
+    }
+    fn into_array(&self) -> [P; 3] {
+        let (a, b, c) = self.into_tuple();
+        [a, b, c]
+    }
+    fn from_other<F: Point3 , T: Trig<F>>(other: &T) -> Self{
+        let (a , b ,c) = other.into_tuple();
+        Self::from_tuple((P::from_other(a) , P::from_other(b) , P::from_other(c)  ))
+
+    }
+    fn aabb(&self) -> [P;2]{
+        let arr = Triangle::from_other(self).aabb();
+        [P::from_other(arr[0]) , P::from_other(arr[1])]
+    }
+    fn area(&self) -> f64{
+        Triangle::area(&Triangle::from_other(self))
+    }
+    fn barycentric_to_cartesian(&self , pt: &P) -> P{
+        P::from_other(Triangle::barycentric_to_cartesian(&Triangle::from_other(self) , &Point::from_other(*pt)))
+    }
+    fn cartesian_to_barycentric(&self , pt: &P) -> P{
+        P::from_other(Triangle::cartesian_to_barycentric(&Triangle::from_other(self) , &Point::from_other(*pt)))
+    }
+    fn has_point(&self , pt: P) -> bool{
+        Triangle::has_point(&Triangle::from_other(self) , Point::from_other(pt))
+    }
+    fn perimeter(&self) -> f64{
+        Triangle::perimeter(&Triangle::from_other(self))
+    }
+    
+}
+
+#[derive(Debug, Copy, Clone)]
 pub struct Point {
     pub x: f64,
     pub y: f64,
     pub z: f64,
 }
+
+impl Point3 for Point{
+    fn x(&self) -> f64{
+        self.x
+    }
+    fn y(&self) -> f64{
+        self.y
+    }
+    fn z(&self) -> f64{
+        self.z
+    }
+    fn from_tuple(tup: (f64 , f64 , f64)) -> Self{
+        Self{
+            x: tup.0,
+            y: tup.1,
+            z: tup.2,
+        }
+    }
+}
+
+
 impl Point {
     ///Calculates distance to another Point.
     pub fn distance_to(&self, pt: &Point) -> f64 {
@@ -11,12 +110,32 @@ impl Point {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Triangle {
     pub a: Point,
     pub b: Point,
     pub c: Point,
 }
+
+impl Trig<Point> for Triangle{
+    fn from_tuple(tup: (Point ,Point ,Point )) -> Self{
+        Self{
+            a: tup.0,
+            b: tup.1,
+            c: tup.2,
+        }
+    }
+    fn a(&self) -> Point{
+        self.a
+    }
+    fn b(&self) -> Point{
+        self.b
+    }
+    fn c(&self) -> Point{
+        self.c
+    }
+}
+
 impl Triangle {
     ///Returns two opposite points of axis-aligned bounding box.
     pub fn aabb(&self) -> [Point; 2] {

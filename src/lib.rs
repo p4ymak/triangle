@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Point {
     pub x: f64,
     pub y: f64,
@@ -11,7 +11,7 @@ impl Point {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct Triangle {
     pub a: Point,
     pub b: Point,

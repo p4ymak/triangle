@@ -138,25 +138,24 @@ impl Trig<Point> for Triangle {
     }
 }
 
-fn square<T: std::ops::Mul<T , Output = T> + Copy>(t: T) -> T{
+fn square<T: std::ops::Mul<T, Output = T> + Copy>(t: T) -> T {
     t * t
 }
 
-fn sort_tuple3(tup: (f64 , f64 , f64)) -> (f64 ,f64 ,f64  ){
+fn sort_tuple3(tup: (f64, f64, f64)) -> (f64, f64, f64) {
     use std::mem::swap;
-    let (mut a ,mut  b ,mut c) = tup;
-    if a > b{
-        swap(&mut a ,&mut b);
+    let (mut a, mut b, mut c) = tup;
+    if a > b {
+        swap(&mut a, &mut b);
     }
-    if b > c{
-        swap(&mut b , &mut c)
+    if b > c {
+        swap(&mut b, &mut c)
     }
-    if a > b{
-       swap(&mut a , &mut b) 
+    if a > b {
+        swap(&mut a, &mut b)
     }
-    (a , b ,  c)
+    (a, b, c)
 }
-
 
 impl Triangle {
     ///Returns two opposite points of axis-aligned bounding box.
@@ -180,18 +179,22 @@ impl Triangle {
 
     ///Gets area of the triangle.
     pub fn area(&self) -> f64 {
-        (square(self.b.x * self.a.y - self.c.x * self.a.y - self.a.x * self.b.y
-            + self.c.x * self.b.y
-            + self.a.x * self.c.y
-            - self.b.x * self.c.y)
-            + square(self.b.x * self.a.z - self.c.x * self.a.z - self.a.x * self.b.z
+        (square(
+            self.b.x * self.a.y - self.c.x * self.a.y - self.a.x * self.b.y
+                + self.c.x * self.b.y
+                + self.a.x * self.c.y
+                - self.b.x * self.c.y,
+        ) + square(
+            self.b.x * self.a.z - self.c.x * self.a.z - self.a.x * self.b.z
                 + self.c.x * self.b.z
                 + self.a.x * self.c.z
-                - self.b.x * self.c.z)
-            + square(self.b.y * self.a.z - self.c.y * self.a.z - self.a.y * self.b.z
+                - self.b.x * self.c.z,
+        ) + square(
+            self.b.y * self.a.z - self.c.y * self.a.z - self.a.y * self.b.z
                 + self.c.y * self.b.z
                 + self.a.y * self.c.z
-                - self.b.y * self.c.z))
+                - self.b.y * self.c.z,
+        ))
         .sqrt()
             / 2.0
     }

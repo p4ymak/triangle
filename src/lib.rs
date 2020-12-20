@@ -7,7 +7,7 @@ pub struct Point {
 impl Point {
     ///Calculates distance to another Point.
     pub fn distance_to(&self, pt: &Point) -> f64 {
-        ((self.x - pt.x).powf(2.0) + (self.y - pt.y).powf(2.0) + (self.z - pt.z).powf(2.0)).sqrt()
+        ((self.x - pt.x).powi(2) + (self.y - pt.y).powi(2) + (self.z - pt.z).powi(2)).sqrt()
     }
 }
 
@@ -40,25 +40,23 @@ impl Triangle {
         ]
     }
 
+    ///Gets angles of the triangle.
+    pub fn angles(&self) -> Option<[f64; 3]> {
+        if self.is_collinear() {
+            return None;
+        }
+        let [la, lb, lc] = self.sides();
+        let alpha = ((lb.powi(2) + lc.powi(2) - la.powi(2)) / (2.0 * lb * lc)).acos();
+        let beta = ((la.powi(2) + lc.powi(2) - lb.powi(2)) / (2.0 * la * lc)).acos();
+        let gamma = std::f64::consts::PI - alpha - beta;
+        Some([alpha, beta, gamma])
+    }
+
     ///Gets area of the triangle.
     pub fn area(&self) -> f64 {
-        ((self.b.x * self.a.y - self.c.x * self.a.y - self.a.x * self.b.y
-            + self.c.x * self.b.y
-            + self.a.x * self.c.y
-            - self.b.x * self.c.y)
-            .powf(2.0)
-            + (self.b.x * self.a.z - self.c.x * self.a.z - self.a.x * self.b.z
-                + self.c.x * self.b.z
-                + self.a.x * self.c.z
-                - self.b.x * self.c.z)
-                .powf(2.0)
-            + (self.b.y * self.a.z - self.c.y * self.a.z - self.a.y * self.b.z
-                + self.c.y * self.b.z
-                + self.a.y * self.c.z
-                - self.b.y * self.c.z)
-                .powf(2.0))
-        .sqrt()
-            / 2.0
+        let s = self.semiperimeter();
+        let [la, lb, lc] = self.sides();
+        (s * (s - la) * (s - lb) * (s - lc)).sqrt()
     }
 
     ///Converts barycentric coordinates of given point to cartesian coordinate system.
@@ -93,6 +91,27 @@ impl Triangle {
         Point { x: u, y: v, z: w }
     }
 
+    ///Gets centroid of the triangle.
+    pub fn centroid(&self) -> Point {
+        let cx = (self.a.x + self.b.x + self.c.x) / 3.0;
+        let cy = (self.a.y + self.b.y + self.c.y) / 3.0;
+        let cz = (self.a.z + self.b.z + self.c.z) / 3.0;
+        Point {
+            x: cx,
+            y: cy,
+            z: cz,
+        }
+    }
+
+    ///Gets radius of a circle that passes through all of the triangle's vertices, so called
+    ///circumradius.
+    pub fn circumradius(&self) -> Option<f64> {
+        if self.is_collinear() {
+            return None;
+        }
+        Some(self.sides().iter().product::<f64>() / (4.0 * self.area()))
+    }
+
     ///Checks whether a given point lies inside the triangle.
     pub fn has_point(&self, pt: Point) -> bool {
         fn sign(a: &Point, b: &Point, c: &Point) -> f32 {
@@ -106,8 +125,45 @@ impl Triangle {
         !(has_neg && has_pos)
     }
 
+    ///Gets the heights of the triangle.
+    pub fn heights(&self) -> Option<[f64; 3]> {
+        if self.is_collinear() {
+            return None;
+        }
+        let double_area = 2.0 * self.area();
+        let [la, lb, lc] = self.sides();
+        Some([double_area / la, double_area / lb, double_area / lc])
+    }
+
+    ///Gets radius of a circle which is tangent to each side of the triangle, so called inradius.
+    pub fn inradius(&self) -> Option<f64> {
+        if self.is_collinear() {
+            return None;
+        }
+        Some(self.area() / self.semiperimeter())
+    }
+
+    ///Checks if points of triangle are collinear.
+    pub fn is_collinear(&self) -> bool {
+        self.area() == 0.0
+    }
+
     ///Gets perimeter of the triangle.
     pub fn perimeter(&self) -> f64 {
-        self.a.distance_to(&self.b) + self.b.distance_to(&self.c) + self.c.distance_to(&self.a)
+        self.sides().iter().sum()
+    }
+
+    ///Gets semiperimeter of the triangle.
+    pub fn semiperimeter(&self) -> f64 {
+        self.perimeter() / 2.0
+    }
+
+    ///Gets lengths of sides opposite to points.
+    pub fn sides(&self) -> [f64; 3] {
+        [
+            self.b.distance_to(&self.c),
+            self.c.distance_to(&self.a),
+            self.a.distance_to(&self.b),
+        ]
     }
 }

@@ -6,5 +6,5 @@ For now works with f64 values.
 - Area
 - Barycentric to Cartesian transform
 - Cartesian to Barycentric transform
-- Cheks wheter a given point lies inside the triangle
+- Checks wheter a given point lies inside the triangle
 - Perimeter

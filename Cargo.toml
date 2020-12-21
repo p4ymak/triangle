@@ -7,5 +7,5 @@ license = "MIT"
 repository = "https://github.com/p4ymak/triangle"
 description = "Struct for geometric triangles. Includes Barycentric-Cartesian transforms and stuff.."
 readme = "README.md"
-keywords = ["struct", "triangle", "math" ,"geometry", "graphics", "3d"]
+keywords = ["struct", "triangle","geometry", "graphics", "3d"]
 [dependencies]

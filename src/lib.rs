@@ -93,13 +93,10 @@ impl Triangle {
 
     ///Gets centroid of the triangle.
     pub fn centroid(&self) -> Point {
-        let cx = (self.a.x + self.b.x + self.c.x) / 3.0;
-        let cy = (self.a.y + self.b.y + self.c.y) / 3.0;
-        let cz = (self.a.z + self.b.z + self.c.z) / 3.0;
         Point {
-            x: cx,
-            y: cy,
-            z: cz,
+            x: (self.a.x + self.b.x + self.c.x) / 3.0,
+            y: (self.a.y + self.b.y + self.c.y) / 3.0,
+            z: (self.a.z + self.b.z + self.c.z) / 3.0,
         }
     }
 
@@ -146,6 +143,50 @@ impl Triangle {
     ///Checks if points of triangle are collinear.
     pub fn is_collinear(&self) -> bool {
         self.area() == 0.0
+    }
+
+    ///Checks if the triangle is equilateral.
+    pub fn is_equilateral(&self) -> bool {
+        let sides = self.sides();
+        sides[0] == sides[1] && sides[1] == sides[2]
+    }
+
+    ///Checks if the triangle is golden or sublime.
+    pub fn is_golden(&self) -> bool {
+        if !self.is_isosceles() {
+            return false;
+        }
+        let mut sides = self.sides();
+        sides.sort_by(|a, b| a.partial_cmp(&b).unwrap());
+        let min = sides[0];
+        let max = sides[2];
+        max / min == (1.0 + 5.0_f64.sqrt()) / 2.0
+    }
+
+    ///Checks if the triangle is isosceles.
+    pub fn is_isosceles(&self) -> bool {
+        let sides = self.sides();
+        sides[0] == sides[1] || sides[1] == sides[2] || sides[2] == sides[0]
+    }
+
+    ///Checks if the triangle is right-angled.
+    pub fn is_right(&self) -> bool {
+        if self.is_collinear() {
+            return false;
+        }
+        let angles = self.angles().unwrap();
+        let half_pi = std::f64::consts::PI / 2.0;
+
+        angles[0] == half_pi || angles[1] == half_pi || angles[2] == half_pi
+    }
+
+    ///Gets medians of the triangle.
+    pub fn medians(&self) -> [f64; 3] {
+        let [la, lb, lc] = self.sides();
+        let ma = (2.0 * lb.powi(2) + 2.0 * lc.powi(2) - la.powi(2)).sqrt() / 2.0;
+        let mb = (2.0 * lc.powi(2) + 2.0 * la.powi(2) - lb.powi(2)).sqrt() / 2.0;
+        let mc = (2.0 * la.powi(2) + 2.0 * lb.powi(2) - lc.powi(2)).sqrt() / 2.0;
+        [ma, mb, mc]
     }
 
     ///Gets perimeter of the triangle.

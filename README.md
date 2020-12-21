@@ -13,6 +13,11 @@ The triangle defined by three 3D points with coordinates of f64 values.
 - Checks if vertices are collinear
 - Heights
 - Inradius
+- Is it equilateral
+- Is it golden
+- Is it isosceles
+- Is it right-angled
+- Medians
 - Perimeter
 - Semiperimeter
 - Sides

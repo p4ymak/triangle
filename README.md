@@ -18,6 +18,7 @@ The triangle defined by three 3D points with coordinates of f64 values.
 - Is it isosceles
 - Is it right-angled
 - Medians
+- Normal
 - Perimeter
 - Semiperimeter
 - Sides

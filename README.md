@@ -20,5 +20,6 @@ The triangle defined by three 3D points with coordinates of f64 values.
 - Medians
 - Normal
 - Perimeter
+- Ray/Triangle intersection by Möller & Trumbore algorithm
 - Semiperimeter
 - Sides

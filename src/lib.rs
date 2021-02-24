@@ -1,3 +1,5 @@
+use std::ops::{Add, Sub};
+
 #[derive(Debug, Copy, Clone)]
 pub struct Point {
     pub x: f64,
@@ -5,22 +7,18 @@ pub struct Point {
     pub z: f64,
 }
 impl Point {
-    ///Calculates sum of two Points.
-    pub fn add(&self, pt: &Point) -> Point {
+    ///Cross product of two Points coordinates.
+    pub fn cross(&self, pt: &Point) -> Point {
         return Point {
-            x: self.x + pt.x,
-            y: self.y + pt.y,
-            z: self.z + pt.z,
+            x: self.y * pt.z - pt.y * self.z,
+            y: self.z * pt.x - pt.z * self.x,
+            z: self.x * pt.y - pt.x * self.y,
         };
     }
 
-    ///Calculates subtraction of two Points.
-    pub fn subtract(&self, pt: &Point) -> Point {
-        return Point {
-            x: self.x - pt.x,
-            y: self.y - pt.y,
-            z: self.z - pt.z,
-        };
+    ///Dot product of two points coordinates.
+    pub fn dot(&self, pt: &Point) -> f64 {
+        return self.x * pt.x + self.y * pt.y + self.z * pt.z;
     }
 
     ///Calculates distance to another Point.
@@ -44,6 +42,28 @@ impl Point {
             y: self.y / n,
             z: self.z / n,
         };
+    }
+}
+impl Add for Point {
+    type Output = Self;
+    ///Calculates sum of two Points.
+    fn add(self, other: Self) -> Self {
+        Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+        }
+    }
+}
+impl Sub for Point {
+    type Output = Self;
+    ///Calculates subtraction of two Points.
+    fn sub(self, other: Self) -> Self {
+        Self {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+        }
     }
 }
 
@@ -229,8 +249,8 @@ impl Triangle {
         if self.is_collinear() {
             return None;
         }
-        let u = self.b.subtract(&self.a);
-        let v = self.c.subtract(&self.a);
+        let u = self.b - self.a;
+        let v = self.c - self.a;
         let n = Point {
             x: u.y * v.z - u.z * v.y,
             y: u.z * v.x - u.x * v.z,
@@ -242,6 +262,36 @@ impl Triangle {
     ///Gets perimeter of the triangle.
     pub fn perimeter(&self) -> f64 {
         return self.sides().iter().sum();
+    }
+
+    ///Gets distance from ray origin to intersection with triangle. Möller & Trumbore algorithm.
+    pub fn ray_intersection(&self, ray_orig: &Point, ray_dir: &Point) -> Option<f64> {
+        if self.is_collinear() {
+            return None;
+        }
+
+        let e1 = self.b - self.a;
+        let e2 = self.c - self.a;
+        let pvec = ray_dir.cross(&e2);
+        let det = e1.dot(&pvec);
+        if det.abs() < f64::MIN {
+            return None;
+        }
+
+        let inv_det = 1.0 / det;
+        let tvec = *ray_orig - self.a;
+        let u = tvec.dot(&pvec) * inv_det;
+        if u < 0.0 || u > 1.0 {
+            return None;
+        }
+
+        let qvec = tvec.cross(&e1);
+        let v = ray_dir.dot(&qvec) * inv_det;
+        if v < 0.0 || (u + v) > 1.0 {
+            return None;
+        }
+
+        return Some(e2.dot(&qvec) * inv_det);
     }
 
     ///Gets semiperimeter of the triangle.

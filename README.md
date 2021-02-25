@@ -1,5 +1,5 @@
 **Struct for geometric triangles.**
-The triangle defined by three 3D points with coordinates of f64 values.
+Allows f64 or f32 values.
 
 **Features:**
 - AABB

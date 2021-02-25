@@ -1,11 +1,10 @@
 use std::ops::{Add, Sub};
 
-pub mod lib32;
 #[derive(Debug, Copy, Clone)]
 pub struct Point {
-    pub x: f64,
-    pub y: f64,
-    pub z: f64,
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
 }
 impl Point {
     ///Cross product of two Points coordinates.
@@ -18,12 +17,12 @@ impl Point {
     }
 
     ///Dot product of two points coordinates.
-    pub fn dot(&self, pt: &Point) -> f64 {
+    pub fn dot(&self, pt: &Point) -> f32 {
         return self.x * pt.x + self.y * pt.y + self.z * pt.z;
     }
 
     ///Calculates distance to another Point.
-    pub fn distance_to(&self, pt: &Point) -> f64 {
+    pub fn distance_to(&self, pt: &Point) -> f32 {
         return ((self.x - pt.x).powi(2) + (self.y - pt.y).powi(2) + (self.z - pt.z).powi(2))
             .sqrt();
     }
@@ -98,19 +97,19 @@ impl Triangle {
     }
 
     ///Gets angles of the triangle.
-    pub fn angles(&self) -> Option<[f64; 3]> {
+    pub fn angles(&self) -> Option<[f32; 3]> {
         if self.is_collinear() {
             return None;
         }
         let [la, lb, lc] = self.sides();
         let alpha = ((lb.powi(2) + lc.powi(2) - la.powi(2)) / (2.0 * lb * lc)).acos();
         let beta = ((la.powi(2) + lc.powi(2) - lb.powi(2)) / (2.0 * la * lc)).acos();
-        let gamma = std::f64::consts::PI - alpha - beta;
+        let gamma = std::f32::consts::PI - alpha - beta;
         return Some([alpha, beta, gamma]);
     }
 
     ///Gets area of the triangle.
-    pub fn area(&self) -> f64 {
+    pub fn area(&self) -> f32 {
         let s = self.semiperimeter();
         let [la, lb, lc] = self.sides();
         return (s * (s - la) * (s - lb) * (s - lc)).sqrt();
@@ -159,17 +158,17 @@ impl Triangle {
 
     ///Gets radius of a circle that passes through all of the triangle's vertices, so called
     ///circumradius.
-    pub fn circumradius(&self) -> Option<f64> {
+    pub fn circumradius(&self) -> Option<f32> {
         if self.is_collinear() {
             return None;
         }
-        return Some(self.sides().iter().product::<f64>() / (4.0 * self.area()));
+        return Some(self.sides().iter().product::<f32>() / (4.0 * self.area()));
     }
 
     ///Checks whether a given point lies inside the triangle.
     pub fn has_point(&self, pt: Point) -> bool {
-        fn sign(a: &Point, b: &Point, c: &Point) -> f64 {
-            ((a.x - c.x) * (b.y - c.y) - (b.x - c.x) * (a.y - c.y)) as f64
+        fn sign(a: &Point, b: &Point, c: &Point) -> f32 {
+            ((a.x - c.x) * (b.y - c.y) - (b.x - c.x) * (a.y - c.y)) as f32
         }
         let d1 = sign(&pt, &self.a, &self.b);
         let d2 = sign(&pt, &self.b, &self.c);
@@ -180,7 +179,7 @@ impl Triangle {
     }
 
     ///Gets the heights of the triangle.
-    pub fn heights(&self) -> Option<[f64; 3]> {
+    pub fn heights(&self) -> Option<[f32; 3]> {
         if self.is_collinear() {
             return None;
         }
@@ -190,7 +189,7 @@ impl Triangle {
     }
 
     ///Gets radius of a circle which is tangent to each side of the triangle, so called inradius.
-    pub fn inradius(&self) -> Option<f64> {
+    pub fn inradius(&self) -> Option<f32> {
         if self.is_collinear() {
             return None;
         }
@@ -217,7 +216,7 @@ impl Triangle {
         sides.sort_by(|a, b| a.partial_cmp(&b).unwrap());
         let min = sides[0];
         let max = sides[2];
-        return max / min == (1.0 + 5.0_f64.sqrt()) / 2.0;
+        return max / min == (1.0 + 5.0_f32.sqrt()) / 2.0;
     }
 
     ///Checks if the triangle is isosceles.
@@ -232,12 +231,12 @@ impl Triangle {
             return false;
         }
         let angles = self.angles().unwrap();
-        let half_pi = std::f64::consts::PI / 2.0;
+        let half_pi = std::f32::consts::PI / 2.0;
         return angles[0] == half_pi || angles[1] == half_pi || angles[2] == half_pi;
     }
 
     ///Gets medians of the triangle.
-    pub fn medians(&self) -> [f64; 3] {
+    pub fn medians(&self) -> [f32; 3] {
         let [la, lb, lc] = self.sides();
         let ma = (2.0 * lb.powi(2) + 2.0 * lc.powi(2) - la.powi(2)).sqrt() / 2.0;
         let mb = (2.0 * lc.powi(2) + 2.0 * la.powi(2) - lb.powi(2)).sqrt() / 2.0;
@@ -261,12 +260,12 @@ impl Triangle {
     }
 
     ///Gets perimeter of the triangle.
-    pub fn perimeter(&self) -> f64 {
+    pub fn perimeter(&self) -> f32 {
         return self.sides().iter().sum();
     }
 
-    ///Gets distance from ray origin to intersection with triangle. Möller & f64rumbore algorithm.
-    pub fn ray_intersection(&self, ray_orig: &Point, ray_dir: &Point) -> Option<f64> {
+    ///Gets distance from ray origin to intersection with triangle. Möller & f32rumbore algorithm.
+    pub fn ray_intersection(&self, ray_orig: &Point, ray_dir: &Point) -> Option<f32> {
         if self.is_collinear() {
             return None;
         }
@@ -275,7 +274,7 @@ impl Triangle {
         let e2 = self.c - self.a;
         let pvec = ray_dir.cross(&e2);
         let det = e1.dot(&pvec);
-        if det.abs() < f64::MIN {
+        if det.abs() < f32::MIN {
             return None;
         }
 
@@ -296,12 +295,12 @@ impl Triangle {
     }
 
     ///Gets semiperimeter of the triangle.
-    pub fn semiperimeter(&self) -> f64 {
+    pub fn semiperimeter(&self) -> f32 {
         return self.perimeter() / 2.0;
     }
 
     ///Gets lengths of sides opposite to points.
-    pub fn sides(&self) -> [f64; 3] {
+    pub fn sides(&self) -> [f32; 3] {
         return [
             self.b.distance_to(&self.c),
             self.c.distance_to(&self.a),

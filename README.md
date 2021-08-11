@@ -17,9 +17,11 @@ Allows f64 or f32 values.
 - Is it golden
 - Is it isosceles
 - Is it right-angled
+- Are Points sorted by axis
 - Medians
 - Normal
 - Perimeter
 - Ray/Triangle intersection by Möller & Trumbore algorithm
 - Semiperimeter
 - Sides
+- Sort Points by axis

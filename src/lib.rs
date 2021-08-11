@@ -1,6 +1,5 @@
 use std::ops::{Add, Sub};
 
-pub mod lib32;
 #[derive(Debug, Copy, Clone)]
 pub struct Point {
     pub x: f64,
@@ -10,22 +9,21 @@ pub struct Point {
 impl Point {
     ///Cross product of two Points coordinates.
     pub fn cross(&self, pt: &Point) -> Point {
-        return Point {
+        Point {
             x: self.y * pt.z - pt.y * self.z,
             y: self.z * pt.x - pt.z * self.x,
             z: self.x * pt.y - pt.x * self.y,
-        };
+        }
     }
 
     ///Dot product of two points coordinates.
     pub fn dot(&self, pt: &Point) -> f64 {
-        return self.x * pt.x + self.y * pt.y + self.z * pt.z;
+        self.x * pt.x + self.y * pt.y + self.z * pt.z
     }
 
     ///Calculates distance to another Point.
     pub fn distance_to(&self, pt: &Point) -> f64 {
-        return ((self.x - pt.x).powi(2) + (self.y - pt.y).powi(2) + (self.z - pt.z).powi(2))
-            .sqrt();
+        ((self.x - pt.x).powi(2) + (self.y - pt.y).powi(2) + (self.z - pt.z).powi(2)).sqrt()
     }
 
     ///Normalize coordinates of the Point.
@@ -38,11 +36,11 @@ impl Point {
         if n == 0.0 {
             n = 1.0;
         }
-        return Point {
+        Point {
             x: self.x / n,
             y: self.y / n,
             z: self.z / n,
-        };
+        }
     }
 }
 impl Add for Point {
@@ -75,6 +73,19 @@ pub struct Triangle {
     pub c: Point,
 }
 impl Triangle {
+    ///Creates new Triangle.
+    pub fn new(a: Point, b: Point, c: Point) -> Triangle {
+        Triangle { a, b, c }
+    }
+
+    ///Creates new Triangle from array of Points.
+    pub fn from_array(points: [Point; 3]) -> Triangle {
+        Triangle {
+            a: points[0],
+            b: points[1],
+            c: points[2],
+        }
+    }
     ///Returns two opposite points of axis-aligned bounding box.
     pub fn aabb(&self) -> [Point; 2] {
         let mut c_x = [self.a.x, self.b.x, self.c.x];
@@ -83,7 +94,7 @@ impl Triangle {
         c_x.sort_by(|i, j| i.partial_cmp(j).unwrap());
         c_y.sort_by(|i, j| i.partial_cmp(j).unwrap());
         c_z.sort_by(|i, j| i.partial_cmp(j).unwrap());
-        return [
+        [
             Point {
                 x: c_x[0],
                 y: c_y[0],
@@ -94,7 +105,7 @@ impl Triangle {
                 y: c_y[2],
                 z: c_z[2],
             },
-        ];
+        ]
     }
 
     ///Gets angles of the triangle.
@@ -106,14 +117,14 @@ impl Triangle {
         let alpha = ((lb.powi(2) + lc.powi(2) - la.powi(2)) / (2.0 * lb * lc)).acos();
         let beta = ((la.powi(2) + lc.powi(2) - lb.powi(2)) / (2.0 * la * lc)).acos();
         let gamma = std::f64::consts::PI - alpha - beta;
-        return Some([alpha, beta, gamma]);
+        Some([alpha, beta, gamma])
     }
 
     ///Gets area of the triangle.
     pub fn area(&self) -> f64 {
         let s = self.semiperimeter();
         let [la, lb, lc] = self.sides();
-        return (s * (s - la) * (s - lb) * (s - lc)).sqrt();
+        (s * (s - la) * (s - lb) * (s - lc)).sqrt()
     }
 
     ///Converts barycentric coordinates of given point to cartesian coordinate system.
@@ -121,7 +132,7 @@ impl Triangle {
         let x = pt.x * self.a.x + pt.y * self.b.x + pt.z * self.c.x;
         let y = pt.x * self.a.y + pt.y * self.b.y + pt.z * self.c.y;
         let z = pt.x * self.a.z + pt.y * self.b.z + pt.z * self.c.z;
-        return Point { x: x, y: y, z: z };
+        Point { x, y, z }
     }
 
     ///Converts cartesian coordinates of given point to barycentric coordinate system.
@@ -145,16 +156,16 @@ impl Triangle {
         let v = (v2.x * v1.y - v1.x * v2.y) * den;
         let w = (v0.x * v2.y - v2.x * v0.y) * den;
         let u = 1.0 - v - w;
-        return Point { x: u, y: v, z: w };
+        Point { x: u, y: v, z: w }
     }
 
     ///Gets centroid of the triangle.
     pub fn centroid(&self) -> Point {
-        return Point {
+        Point {
             x: (self.a.x + self.b.x + self.c.x) / 3.0,
             y: (self.a.y + self.b.y + self.c.y) / 3.0,
             z: (self.a.z + self.b.z + self.c.z) / 3.0,
-        };
+        }
     }
 
     ///Gets radius of a circle that passes through all of the triangle's vertices, so called
@@ -163,7 +174,7 @@ impl Triangle {
         if self.is_collinear() {
             return None;
         }
-        return Some(self.sides().iter().product::<f64>() / (4.0 * self.area()));
+        Some(self.sides().iter().product::<f64>() / (4.0 * self.area()))
     }
 
     ///Checks whether a given point lies inside the triangle.
@@ -176,7 +187,7 @@ impl Triangle {
         let d3 = sign(&pt, &self.c, &self.a);
         let has_neg = (d1 < 0.0) || (d2 < 0.0) || (d3 < 0.0);
         let has_pos = (d1 > 0.0) || (d2 > 0.0) || (d3 > 0.0);
-        return !(has_neg && has_pos);
+        !(has_neg && has_pos)
     }
 
     ///Gets the heights of the triangle.
@@ -186,7 +197,7 @@ impl Triangle {
         }
         let double_area = 2.0 * self.area();
         let [la, lb, lc] = self.sides();
-        return Some([double_area / la, double_area / lb, double_area / lc]);
+        Some([double_area / la, double_area / lb, double_area / lc])
     }
 
     ///Gets radius of a circle which is tangent to each side of the triangle, so called inradius.
@@ -194,18 +205,18 @@ impl Triangle {
         if self.is_collinear() {
             return None;
         }
-        return Some(self.area() / self.semiperimeter());
+        Some(self.area() / self.semiperimeter())
     }
 
     ///Checks if points of triangle are collinear.
     pub fn is_collinear(&self) -> bool {
-        return self.area() == 0.0;
+        self.area().eq(&0.0)
     }
 
     ///Checks if the triangle is equilateral.
     pub fn is_equilateral(&self) -> bool {
         let sides = self.sides();
-        return sides[0] == sides[1] && sides[1] == sides[2];
+        sides[0].eq(&sides[1]) && sides[1].eq(&sides[2])
     }
 
     ///Checks if the triangle is golden or sublime.
@@ -214,16 +225,16 @@ impl Triangle {
             return false;
         }
         let mut sides = self.sides();
-        sides.sort_by(|a, b| a.partial_cmp(&b).unwrap());
+        sides.sort_by(|a, b| a.partial_cmp(b).unwrap());
         let min = sides[0];
         let max = sides[2];
-        return max / min == (1.0 + 5.0_f64.sqrt()) / 2.0;
+        (max / min).eq(&((1.0 + 5.0_f64.sqrt()) / 2.0))
     }
 
     ///Checks if the triangle is isosceles.
     pub fn is_isosceles(&self) -> bool {
         let sides = self.sides();
-        return sides[0] == sides[1] || sides[1] == sides[2] || sides[2] == sides[0];
+        sides[0].eq(&sides[1]) || sides[1].eq(&sides[2]) || sides[2].eq(&sides[0])
     }
 
     ///Checks if the triangle is right-angled.
@@ -233,7 +244,7 @@ impl Triangle {
         }
         let angles = self.angles().unwrap();
         let half_pi = std::f64::consts::PI / 2.0;
-        return angles[0] == half_pi || angles[1] == half_pi || angles[2] == half_pi;
+        angles[0].eq(&half_pi) || angles[1].eq(&half_pi) || angles[2].eq(&half_pi)
     }
 
     ///Gets medians of the triangle.
@@ -242,7 +253,7 @@ impl Triangle {
         let ma = (2.0 * lb.powi(2) + 2.0 * lc.powi(2) - la.powi(2)).sqrt() / 2.0;
         let mb = (2.0 * lc.powi(2) + 2.0 * la.powi(2) - lb.powi(2)).sqrt() / 2.0;
         let mc = (2.0 * la.powi(2) + 2.0 * lb.powi(2) - lc.powi(2)).sqrt() / 2.0;
-        return [ma, mb, mc];
+        [ma, mb, mc]
     }
 
     ///Gets normal of the triangle, depending on vertices order.
@@ -257,7 +268,7 @@ impl Triangle {
             y: u.z * v.x - u.x * v.z,
             z: u.x * v.y - u.y * v.x,
         };
-        return Some(n.normalized());
+        Some(n.normalized())
     }
 
     ///Gets perimeter of the triangle.
@@ -292,20 +303,40 @@ impl Triangle {
             return None;
         }
 
-        return Some(e2.dot(&qvec) * inv_det);
+        Some(e2.dot(&qvec) * inv_det)
     }
 
     ///Gets semiperimeter of the triangle.
     pub fn semiperimeter(&self) -> f64 {
-        return self.perimeter() / 2.0;
+        self.perimeter() / 2.0
     }
 
     ///Gets lengths of sides opposite to points.
     pub fn sides(&self) -> [f64; 3] {
-        return [
+        [
             self.b.distance_to(&self.c),
             self.c.distance_to(&self.a),
             self.a.distance_to(&self.b),
-        ];
+        ]
+    }
+
+    ///Checks if Triangle Points are sorted by axis.
+    pub fn is_sorted_by(self, axis_name: char) -> bool {
+        match axis_name {
+            'x' | 'X' | '0' => self.a.x <= self.b.x && self.b.x <= self.c.x,
+            'z' | 'Z' | '2' => self.a.z <= self.b.z && self.b.z <= self.c.z,
+            _ => self.a.y <= self.b.y && self.b.y <= self.c.y,
+        }
+    }
+
+    ///Creates new Triangle with Points sorted by axis.
+    pub fn sorted_by(self, axis_name: char) -> Triangle {
+        let mut sorted = [self.a, self.b, self.c];
+        match axis_name {
+            'x' | 'X' | '0' => sorted.sort_by(|a, b| a.x.partial_cmp(&b.x).unwrap()),
+            'z' | 'Z' | '2' => sorted.sort_by(|a, b| a.z.partial_cmp(&b.z).unwrap()),
+            _ => sorted.sort_by(|a, b| a.y.partial_cmp(&b.y).unwrap()),
+        };
+        Triangle::from_array(sorted)
     }
 }

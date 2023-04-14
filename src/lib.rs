@@ -1,15 +1,23 @@
+#[cfg(test)]
+mod tests;
+use num_traits::{Float, FloatConst};
 use std::ops::{Add, Sub};
-pub mod lib32;
 
-#[derive(Debug, Copy, Clone)]
-pub struct Point {
-    pub x: f64,
-    pub y: f64,
-    pub z: f64,
+#[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Eq, Ord)]
+pub struct Point<F> {
+    pub x: F,
+    pub y: F,
+    pub z: F,
 }
-impl Point {
+
+impl<F: Float + FloatConst> Point<F> {
+    ///Creates new Point.
+    pub fn new(x: F, y: F, z: F) -> Point<F> {
+        Point { x, y, z }
+    }
+
     ///Cross product of two Points coordinates.
-    pub fn cross(&self, pt: &Point) -> Point {
+    pub fn cross(&self, pt: &Point<F>) -> Point<F> {
         Point {
             x: self.y * pt.z - pt.y * self.z,
             y: self.z * pt.x - pt.z * self.x,
@@ -18,24 +26,24 @@ impl Point {
     }
 
     ///Dot product of two points coordinates.
-    pub fn dot(&self, pt: &Point) -> f64 {
+    pub fn dot(&self, pt: &Point<F>) -> F {
         self.x * pt.x + self.y * pt.y + self.z * pt.z
     }
 
     ///Calculates distance to another Point.
-    pub fn distance_to(&self, pt: &Point) -> f64 {
+    pub fn distance_to(&self, pt: &Point<F>) -> F {
         ((self.x - pt.x).powi(2) + (self.y - pt.y).powi(2) + (self.z - pt.z).powi(2)).sqrt()
     }
 
     ///Normalize coordinates of the Point.
-    pub fn normalized(&self) -> Point {
+    pub fn normalized(&self) -> Point<F> {
         let mut n = self.distance_to(&Point {
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
+            x: F::zero(),
+            y: F::zero(),
+            z: F::zero(),
         });
-        if n == 0.0 {
-            n = 1.0;
+        if n == F::zero() {
+            n = F::one();
         }
         Point {
             x: self.x / n,
@@ -44,7 +52,8 @@ impl Point {
         }
     }
 }
-impl Add for Point {
+
+impl<F: Float + FloatConst> Add for Point<F> {
     type Output = Self;
     ///Calculates sum of two Points.
     fn add(self, other: Self) -> Self {
@@ -55,7 +64,8 @@ impl Add for Point {
         }
     }
 }
-impl Sub for Point {
+
+impl<F: Float + FloatConst> Sub for Point<F> {
     type Output = Self;
     ///Calculates subtraction of two Points.
     fn sub(self, other: Self) -> Self {
@@ -67,28 +77,30 @@ impl Sub for Point {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
-pub struct Triangle {
-    pub a: Point,
-    pub b: Point,
-    pub c: Point,
+#[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Eq, Ord)]
+pub struct Triangle<F> {
+    pub a: Point<F>,
+    pub b: Point<F>,
+    pub c: Point<F>,
 }
-impl Triangle {
+
+impl<F: Float + FloatConst> Triangle<F> {
     ///Creates new Triangle.
-    pub fn new(a: Point, b: Point, c: Point) -> Triangle {
+    pub fn new(a: Point<F>, b: Point<F>, c: Point<F>) -> Triangle<F> {
         Triangle { a, b, c }
     }
 
     ///Creates new Triangle from array of Points.
-    pub fn from_array(points: [Point; 3]) -> Triangle {
+    pub fn from_array(points: [Point<F>; 3]) -> Triangle<F> {
         Triangle {
             a: points[0],
             b: points[1],
             c: points[2],
         }
     }
+
     ///Returns two opposite points of axis-aligned bounding box.
-    pub fn aabb(&self) -> [Point; 2] {
+    pub fn aabb(&self) -> [Point<F>; 2] {
         let mut c_x = [self.a.x, self.b.x, self.c.x];
         let mut c_y = [self.a.y, self.b.y, self.c.y];
         let mut c_z = [self.a.z, self.b.z, self.c.z];
@@ -110,26 +122,27 @@ impl Triangle {
     }
 
     ///Gets angles of the triangle.
-    pub fn angles(&self) -> Option<[f64; 3]> {
+    pub fn angles(&self) -> Option<[F; 3]> {
         if self.is_collinear() {
             return None;
         }
         let [la, lb, lc] = self.sides();
-        let alpha = ((lb.powi(2) + lc.powi(2) - la.powi(2)) / (2.0 * lb * lc)).acos();
-        let beta = ((la.powi(2) + lc.powi(2) - lb.powi(2)) / (2.0 * la * lc)).acos();
-        let gamma = std::f64::consts::PI - alpha - beta;
+        let two = F::from(2).expect("cast from 2");
+        let alpha = ((lb.powi(2) + lc.powi(2) - la.powi(2)) / (two * lb * lc)).acos();
+        let beta = ((la.powi(2) + lc.powi(2) - lb.powi(2)) / (two * la * lc)).acos();
+        let gamma = F::PI() - alpha - beta;
         Some([alpha, beta, gamma])
     }
 
     ///Gets area of the triangle.
-    pub fn area(&self) -> f64 {
+    pub fn area(&self) -> F {
         let s = self.semiperimeter();
         let [la, lb, lc] = self.sides();
         (s * (s - la) * (s - lb) * (s - lc)).sqrt()
     }
 
     ///Converts barycentric coordinates of given point to cartesian coordinate system.
-    pub fn barycentric_to_cartesian(&self, pt: &Point) -> Point {
+    pub fn barycentric_to_cartesian(&self, pt: &Point<F>) -> Point<F> {
         let x = pt.x * self.a.x + pt.y * self.b.x + pt.z * self.c.x;
         let y = pt.x * self.a.y + pt.y * self.b.y + pt.z * self.c.y;
         let z = pt.x * self.a.z + pt.y * self.b.z + pt.z * self.c.z;
@@ -137,7 +150,7 @@ impl Triangle {
     }
 
     ///Converts cartesian coordinates of given point to barycentric coordinate system.
-    pub fn cartesian_to_barycentric(&self, pt: &Point) -> Point {
+    pub fn cartesian_to_barycentric(&self, pt: &Point<F>) -> Point<F> {
         let v0 = Point {
             x: self.b.x - self.a.x,
             y: self.b.y - self.a.y,
@@ -153,56 +166,59 @@ impl Triangle {
             y: pt.y - self.a.y,
             z: pt.z - self.a.z,
         };
-        let den = 1.0 / (v0.x * v1.y - v1.x * v0.y);
+        let one = F::from(1).expect("cast from 1");
+        let den = one / (v0.x * v1.y - v1.x * v0.y);
         let v = (v2.x * v1.y - v1.x * v2.y) * den;
         let w = (v0.x * v2.y - v2.x * v0.y) * den;
-        let u = 1.0 - v - w;
+        let u = one - v - w;
         Point { x: u, y: v, z: w }
     }
 
     ///Gets centroid of the triangle.
-    pub fn centroid(&self) -> Point {
+    pub fn centroid(&self) -> Point<F> {
+        let three = F::from(3).expect("cast from 3");
         Point {
-            x: (self.a.x + self.b.x + self.c.x) / 3.0,
-            y: (self.a.y + self.b.y + self.c.y) / 3.0,
-            z: (self.a.z + self.b.z + self.c.z) / 3.0,
+            x: (self.a.x + self.b.x + self.c.x) / three,
+            y: (self.a.y + self.b.y + self.c.y) / three,
+            z: (self.a.z + self.b.z + self.c.z) / three,
         }
     }
 
     ///Gets radius of a circle that passes through all of the triangle's vertices, so called
     ///circumradius.
-    pub fn circumradius(&self) -> Option<f64> {
+    pub fn circumradius(&self) -> Option<F> {
         if self.is_collinear() {
             return None;
         }
-        Some(self.sides().iter().product::<f64>() / (4.0 * self.area()))
+        let one = F::from(1).expect("cast from 1");
+        let four = F::from(4).expect("cast from 4");
+        Some(self.sides().iter().fold(one, |acc, x| acc * *x) / (four * self.area()))
     }
 
     ///Checks whether a given point lies inside the triangle.
-    pub fn has_point(&self, pt: Point) -> bool {
-        fn sign(a: &Point, b: &Point, c: &Point) -> f64 {
-            ((a.x - c.x) * (b.y - c.y) - (b.x - c.x) * (a.y - c.y)) as f64
-        }
+    pub fn has_point(&self, pt: Point<F>) -> bool {
+        let zero = F::from(0).expect("cast from 0");
         let d1 = sign(&pt, &self.a, &self.b);
         let d2 = sign(&pt, &self.b, &self.c);
         let d3 = sign(&pt, &self.c, &self.a);
-        let has_neg = (d1 < 0.0) || (d2 < 0.0) || (d3 < 0.0);
-        let has_pos = (d1 > 0.0) || (d2 > 0.0) || (d3 > 0.0);
+        let has_neg = (d1 < zero) || (d2 < zero) || (d3 < zero);
+        let has_pos = (d1 > zero) || (d2 > zero) || (d3 > zero);
         !(has_neg && has_pos)
     }
 
     ///Gets the heights of the triangle.
-    pub fn heights(&self) -> Option<[f64; 3]> {
+    pub fn heights(&self) -> Option<[F; 3]> {
         if self.is_collinear() {
             return None;
         }
-        let double_area = 2.0 * self.area();
+        let two = F::from(2).expect("cast from 2");
+        let double_area = two * self.area();
         let [la, lb, lc] = self.sides();
         Some([double_area / la, double_area / lb, double_area / lc])
     }
 
     ///Gets radius of a circle which is tangent to each side of the triangle, so called inradius.
-    pub fn inradius(&self) -> Option<f64> {
+    pub fn inradius(&self) -> Option<F> {
         if self.is_collinear() {
             return None;
         }
@@ -211,7 +227,7 @@ impl Triangle {
 
     ///Checks if points of triangle are collinear.
     pub fn is_collinear(&self) -> bool {
-        self.area().eq(&0.0)
+        self.area().eq(&F::from(0).expect("cast from 0"))
     }
 
     ///Checks if the triangle is equilateral.
@@ -229,7 +245,11 @@ impl Triangle {
         sides.sort_by(|a, b| a.partial_cmp(b).unwrap());
         let min = sides[0];
         let max = sides[2];
-        (max / min).eq(&((1.0 + 5.0_f64.sqrt()) / 2.0))
+        let one = F::from(1).expect("cast from 1");
+        let two = F::from(2).expect("cast from 2");
+        let five = F::from(5).expect("cast from 5");
+
+        (max / min).eq(&((one + five.sqrt()) / two))
     }
 
     ///Checks if the triangle is isosceles.
@@ -244,21 +264,22 @@ impl Triangle {
             return false;
         }
         let angles = self.angles().unwrap();
-        let half_pi = std::f64::consts::PI / 2.0;
+        let half_pi = F::FRAC_PI_2();
         angles[0].eq(&half_pi) || angles[1].eq(&half_pi) || angles[2].eq(&half_pi)
     }
 
     ///Gets medians of the triangle.
-    pub fn medians(&self) -> [f64; 3] {
+    pub fn medians(&self) -> [F; 3] {
         let [la, lb, lc] = self.sides();
-        let ma = (2.0 * lb.powi(2) + 2.0 * lc.powi(2) - la.powi(2)).sqrt() / 2.0;
-        let mb = (2.0 * lc.powi(2) + 2.0 * la.powi(2) - lb.powi(2)).sqrt() / 2.0;
-        let mc = (2.0 * la.powi(2) + 2.0 * lb.powi(2) - lc.powi(2)).sqrt() / 2.0;
+        let two = F::from(2).expect("cast from 2");
+        let ma = (two * lb.powi(2) + two * lc.powi(2) - la.powi(2)).sqrt() / two;
+        let mb = (two * lc.powi(2) + two * la.powi(2) - lb.powi(2)).sqrt() / two;
+        let mc = (two * la.powi(2) + two * lb.powi(2) - lc.powi(2)).sqrt() / two;
         [ma, mb, mc]
     }
 
     ///Gets normal of the triangle, depending on vertices order.
-    pub fn normal(&self) -> Option<Point> {
+    pub fn normal(&self) -> Option<Point<F>> {
         if self.is_collinear() {
             return None;
         }
@@ -273,12 +294,13 @@ impl Triangle {
     }
 
     ///Gets perimeter of the triangle.
-    pub fn perimeter(&self) -> f64 {
-        return self.sides().iter().sum();
+    pub fn perimeter(&self) -> F {
+        let zero = F::from(0).expect("cast from 0");
+        return self.sides().iter().fold(zero, |acc, x| acc + *x);
     }
 
     ///Gets distance from ray origin to intersection with triangle. Möller & f64rumbore algorithm.
-    pub fn ray_intersection(&self, ray_orig: &Point, ray_dir: &Point) -> Option<f64> {
+    pub fn ray_intersection(&self, ray_orig: &Point<F>, ray_dir: &Point<F>) -> Option<F> {
         if self.is_collinear() {
             return None;
         }
@@ -287,20 +309,22 @@ impl Triangle {
         let e2 = self.c - self.a;
         let pvec = ray_dir.cross(&e2);
         let det = e1.dot(&pvec);
-        if det.abs() < f64::MIN {
+        let zero = F::from(0).expect("cast from 0");
+        let one = F::from(1).expect("cast from 1");
+        if det.abs() < F::min_value() {
             return None;
         }
 
-        let inv_det = 1.0 / det;
+        let inv_det = one / det;
         let tvec = *ray_orig - self.a;
         let u = tvec.dot(&pvec) * inv_det;
-        if u < 0.0 || u > 1.0 {
+        if u < zero || u > one {
             return None;
         }
 
         let qvec = tvec.cross(&e1);
         let v = ray_dir.dot(&qvec) * inv_det;
-        if v < 0.0 || (u + v) > 1.0 {
+        if v < zero || (u + v) > one {
             return None;
         }
 
@@ -308,12 +332,13 @@ impl Triangle {
     }
 
     ///Gets semiperimeter of the triangle.
-    pub fn semiperimeter(&self) -> f64 {
-        self.perimeter() / 2.0
+    pub fn semiperimeter(&self) -> F {
+        let two = F::from(2).expect("cast from 2");
+        self.perimeter() / two
     }
 
     ///Gets lengths of sides opposite to points.
-    pub fn sides(&self) -> [f64; 3] {
+    pub fn sides(&self) -> [F; 3] {
         [
             self.b.distance_to(&self.c),
             self.c.distance_to(&self.a),
@@ -331,7 +356,7 @@ impl Triangle {
     }
 
     ///Creates new Triangle with Points sorted by axis.
-    pub fn sorted_by(self, axis_name: char) -> Triangle {
+    pub fn sorted_by(self, axis_name: char) -> Triangle<F> {
         let mut sorted = [self.a, self.b, self.c];
         match axis_name {
             'x' | 'X' | '0' => sorted.sort_by(|a, b| a.x.partial_cmp(&b.x).unwrap()),
@@ -340,4 +365,8 @@ impl Triangle {
         };
         Triangle::from_array(sorted)
     }
+}
+
+fn sign<F: Float + FloatConst>(a: &Point<F>, b: &Point<F>, c: &Point<F>) -> F {
+    (a.x - c.x) * (b.y - c.y) - (b.x - c.x) * (a.y - c.y)
 }

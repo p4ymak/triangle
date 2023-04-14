@@ -1,5 +1,4 @@
 **Struct for geometric triangles.**
-Allows f64 or f32 values.
 
 **Features:**
 - AABB

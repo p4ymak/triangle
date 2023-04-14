@@ -1,11 +1,13 @@
 [package]
 name = "triangle"
-version = "0.1.353"
-authors = ["Roman Chumak <p4ymak@gmail.com>"]
-edition = "2018"
+version = "0.2.0"
+authors = ["Roman Chumak <p4ymak@yandex.ru>"]
+edition = "2021"
 license = "MIT"
 repository = "https://github.com/p4ymak/triangle"
 description = "Struct for geometric triangles. Includes Barycentric-Cartesian transforms and stuff.."
 readme = "README.md"
 keywords = ["struct", "triangle","geometry", "math", "3d"]
+
 [dependencies]
+num-traits = "0.2.15"
